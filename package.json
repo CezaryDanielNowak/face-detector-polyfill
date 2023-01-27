@@ -1,6 +1,6 @@
 {
   "name": "face-detector-polyfill",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Polyfill for FaceDetector API",
   "main": "dist/FaceDetector.js",
   "scripts": {
@@ -9,20 +9,17 @@
     "gh-pages": "gh-pages -d examples"
   },
   "devDependencies": {
-    "babel-cli": "6.24.1",
-    "babel-core": "6.24.1",
+    "babel-cli": "6.26.0",
+    "babel-core": "6.26.3",
     "babel-eslint": "7.2.3",
-    "babel-loader": "7.0.0",
-    "babel-plugin-add-module-exports": "0.2.1",
+    "babel-loader": "7.1.5",
+    "babel-plugin-add-module-exports": "1.0.4",
     "babel-preset-es2015": "6.24.1",
-    "chai": "3.5.0",
     "eslint": "3.19.0",
-    "eslint-loader": "1.7.1",
-    "mocha": "3.3.0",
-    "webpack": "2.4.1",
-    "worker-loader": "^0.8.0",
-    "yargs": "7.1.0",
-    "gh-pages": "^1.0.0"
+    "eslint-loader": "1.9.0",
+    "webpack": "2.7.0",
+    "worker-loader": "1.1.1",
+    "gh-pages": "1.2.0"
   },
   "repository": {
     "type": "git",
@@ -42,7 +39,7 @@
     "jsfeat",
     "bbf"
   ],
-  "author": "Gilad Dayagi",
+  "author": "Gilad Dayagi, Cezary Nowak",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/giladaya/face-detector-polyfill/issues"

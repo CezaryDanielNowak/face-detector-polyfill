@@ -3,7 +3,7 @@
 const webpack = require('webpack');
 const UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 const path = require('path');
-const env  = require('yargs').argv.env; // use --env with webpack 2
+const isBuild = JSON.parse(process.env.npm_config_argv).cooked.includes('build');
 
 let libraryName = 'FaceDetector';
 
@@ -22,7 +22,7 @@ let plugins = [], outputFile;
 //   })
 // )
 
-if (env === 'build') {
+if (isBuild) {
   plugins.push(new UglifyJsPlugin({ minimize: true }));
   outputFile = libraryName + '.min.js';
 } else {
