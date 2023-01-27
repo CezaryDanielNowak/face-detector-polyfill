@@ -33,7 +33,7 @@ const config = {
   entry: __dirname + '/src/index',
   devtool: 'source-map',
   output: {
-    path: path.join(__dirname, "dist"),
+    path: path.join(__dirname, 'dist'),
     filename: outputFile,
     library: [libraryName],
     libraryTarget: 'umd',
@@ -49,7 +49,10 @@ const config = {
       {
         test: /(\.jsx|\.js)$/,
         loader: 'eslint-loader',
-        exclude: /node_modules/
+        exclude: [
+          /node_modules/,
+          /src\/lib/
+        ]
       }
     ]
   },

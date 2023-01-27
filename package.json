@@ -4,8 +4,9 @@
   "description": "Polyfill for FaceDetector API",
   "main": "dist/FaceDetector.js",
   "scripts": {
-    "build": "rm -rf dist/* && webpack && webpack --env build && cp dist/FaceDetector.min.js examples/",
-    "dev": "webpack --progress --colors --watch --env dev",
+    "copy-jsfeat": "cp ./node_modules/jsfeat/build/jsfeat.js ./src/lib/ && cp ./node_modules/jsfeat/cascades/bbf_face.js ./src/lib/",
+    "build": "yarn run copy-jsfeat && rm -rf dist/* && webpack && webpack --env build && cp dist/FaceDetector.min.js examples/",
+    "dev": "yarn run copy-jsfeat && webpack --progress --colors --watch --env dev",
     "gh-pages": "gh-pages -d examples"
   },
   "devDependencies": {
@@ -17,9 +18,10 @@
     "babel-preset-es2015": "6.24.1",
     "eslint": "3.19.0",
     "eslint-loader": "1.9.0",
+    "gh-pages": "1.2.0",
+    "jsfeat": "https://github.com/inspirit/jsfeat/archive/4c7b336bbeeb26e6cd4cdf3c7d414abe273846f3.tar.gz",
     "webpack": "2.7.0",
-    "worker-loader": "1.1.1",
-    "gh-pages": "1.2.0"
+    "worker-loader": "1.1.1"
   },
   "repository": {
     "type": "git",

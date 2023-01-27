@@ -64,14 +64,14 @@ if ('FaceDetector' in window) {
 
 ## Development
 1. Install dependencies
-`npm install` or `yarn install`
+`yarn install`
 
 2. Development
-`npm run dev` or `yarn run dev`
+`yarn run dev`
 populates code to `dist/` with autoreload.
 
 3. Prod build
-`npm run build` or `yarn run build`
+`yarn run build`
 populates code to `dist/` and `examples/` with compression.
 
 

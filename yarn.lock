@@ -2335,6 +2335,10 @@ jsesc@~0.5.0:
   resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-0.5.0.tgz#e7dee66e35d6fc16f710fe91d5cf69f70f08911d"
   integrity sha512-uZz5UnB7u4T9LvwmFqXii7pZSouaRPorGs5who1Ip7VO0wxanFvBL7GkM6dTHlgX+jhBApRetaWpnDabOeTcnA==
 
+"jsfeat@https://github.com/inspirit/jsfeat/archive/4c7b336bbeeb26e6cd4cdf3c7d414abe273846f3.tar.gz":
+  version "0.0.8"
+  resolved "https://github.com/inspirit/jsfeat/archive/4c7b336bbeeb26e6cd4cdf3c7d414abe273846f3.tar.gz#5c75a538f22f2af906808ed42b4217f6d4734e92"
+
 json-loader@^0.5.4:
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/json-loader/-/json-loader-0.5.7.tgz#dca14a70235ff82f0ac9a3abeb60d337a365185d"
