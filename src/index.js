@@ -5,7 +5,7 @@ let lastMsgId = 0
 const resolves = {}
 const rejects = {}
 
-const FaceDetectorCallback = (e) => {
+const faceDetectorCallback = (e) => {
   // transform results in e.data.result
   const id = e.data.id
   const resolve = resolves[id]
@@ -28,6 +28,7 @@ const DEFAULT_OPTIONS = {
   maxDetectedFaces: 1,
   fastMode: true,
 }
+
 const MAX_WORK_SIZE_FAST = 320
 const MAX_WORK_SIZE_SLOW = 640
 
@@ -41,41 +42,40 @@ export default class Library {
     this.maxDetectedFaces = config.maxDetectedFaces
     this.maxWorkSize = config.fastMode ? MAX_WORK_SIZE_FAST : MAX_WORK_SIZE_SLOW
     this.canvas = document.createElement('canvas')
-    this.ctx = this.canvas.getContext('2d')
+    this.ctx = this.canvas.getContext('2d', { willReadFrequently: true })
 
     this.worker = new Worker();
-    this.worker.onmessage = FaceDetectorCallback
+    this.worker.onmessage = faceDetectorCallback
   }
 
-  detect(image) {
+  detect(input) {
     return new Promise((resolve, reject) => {
       // book keeping
-      const msgId = lastMsgId++
+      ++lastMsgId;
 
-      resolves[msgId] = resolve
-      rejects[msgId] = reject
+      resolves[lastMsgId] = resolve
+      rejects[lastMsgId] = reject
 
-      const W = image.naturalWidth || image.width
-      const H = image.naturalHeight || image.height
+      // videoWidth = HTMLVideoElement
+      // naturalWidth = HTMLImageElement
+      // width = HTMLCanvasElement
+      const W = input.videoWidth || input.naturalWidth || input.width
+      const H = input.videoHeight || input.naturalHeight || input.height
 
       const scale = Math.min(this.maxWorkSize / W, this.maxWorkSize / H);
       this.canvas.width = W * scale;
       this.canvas.height = H * scale;
       
-      this.ctx.drawImage(image, 0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.drawImage(input, 0, 0, this.canvas.width, this.canvas.height);
 
-      let msg = {
-        id: msgId,
+      this.worker.postMessage({
+        id: lastMsgId,
         image: this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height),
         width: this.canvas.width,
         height: this.canvas.height,
         scale: 1 / scale,
         maxDetectedFaces: this.maxDetectedFaces,
-      }
-
-      this.worker.postMessage(msg)
-
-      msg = null
+      })
     });
   }
 }
