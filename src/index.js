@@ -10,7 +10,7 @@ const faceDetectorCallback = (e) => {
   const id = e.data.id
   const resolve = resolves[id]
 
-  if (resolve) {
+  if (resolve !== undefined) {
     const results = e.data.result.map(res => ({
       boundingBox: res,
       landmarks: null,
@@ -66,7 +66,7 @@ export default class Library {
       this.canvas.width = W * scale;
       this.canvas.height = H * scale;
       
-      this.ctx.drawImage(input, 0, 0);
+      this.ctx.drawImage(input, 0, 0, this.canvas.width, this.canvas.height);
 
       this.worker.postMessage({
         id: lastMsgId,
