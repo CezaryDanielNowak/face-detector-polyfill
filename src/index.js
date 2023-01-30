@@ -10,7 +10,7 @@ const faceDetectorCallback = (e) => {
   const id = e.data.id
   const resolve = resolves[id]
 
-  if (resolve !== undefined) {
+  if (resolve) {
     const results = e.data.result.map(res => ({
       boundingBox: res,
       landmarks: null,
