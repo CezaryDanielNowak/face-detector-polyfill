@@ -48,7 +48,6 @@ self.onmessage = function (e) {
     y: res.y * scale,
     width: res.width * scale,
     height: res.height * scale,
-    _confidence: res.confidence,
   }))
 
   postMessage({
