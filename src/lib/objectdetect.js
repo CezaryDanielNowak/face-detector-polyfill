@@ -4,7 +4,7 @@
  * 
  * Copyright (c) 2012, Martin Tschirsich
  */
-module.exports = (function() {
+var objectdetect = module.exports = (function() {
 	"use strict";
     	
     var /**
@@ -652,10 +652,10 @@ module.exports = (function() {
 		 * @param classifier  Compiled cascade classifier
 		 */
 		function detector(width, height, scaleFactor, classifier) {
-			this.canvas = document.createElement('canvas');
-			this.canvas.width = width;
-			this.canvas.height = height;
-			this.context = this.canvas.getContext('2d');
+			// this.canvas = document.createElement('canvas');
+			// this.canvas.width = width;
+			// this.canvas.height = height;
+			// this.context = this.canvas.getContext('2d');
 			this.tilted = classifier.tilted;
 			this.scaleFactor = scaleFactor;
 			this.numScales = ~~(Math.log(Math.min(width / classifier[0], height / classifier[1])) / Math.log(scaleFactor));
@@ -679,18 +679,21 @@ module.exports = (function() {
 		 * 
 		 * @return Grouped rectangles
 		 */
-		detector.prototype.detect = function(image, group, stepSize, roi, canny) {
+		detector.prototype.detect = function(_imageData, group, stepSize, roi, canny) {
 			if (stepSize === undefined) stepSize = 1;
 			if (group === undefined) group = 1;
 			
-			var width = this.canvas.width;
-			var height = this.canvas.height;
+			// var width = this.canvas.width;
+			// var height = this.canvas.height;
 			
-			if (roi) 
-				this.context.drawImage(image, roi[0], roi[1], roi[2], roi[3], 0, 0, width, height);
-			else
-				this.context.drawImage(image, 0, 0, width, height);
-			var imageData = this.context.getImageData(0, 0, width, height).data;
+			// if (roi) 
+			// 	this.context.drawImage(image, roi[0], roi[1], roi[2], roi[3], 0, 0, width, height);
+			// else
+			// 	this.context.drawImage(image, 0, 0, width, height);
+			// var imageData = this.context.getImageData(0, 0, width, height).data;
+			const width = _imageData.width;
+			const height = _imageData.height;
+			const imageData = _imageData.data;
 			this.gray = objectdetect.convertRgbaToGrayscale(imageData, this.gray);
 			
 			var rects = [];

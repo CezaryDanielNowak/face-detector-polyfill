@@ -7,7 +7,15 @@ let imgU8;
 let lastHeight = -1;
 let lastWidth = -1;
 
+const CONFIDENCE_THRESHOLD = 10;
+const LIMIT_THRESHOLD = 20;
 
+
+const COORDS_X = 0;
+const COORDS_Y = 1;
+const COORDS_W = 2;
+const COORDS_H = 3;
+const COORDS_CONFIDENCE = 4;
 
 let detectorDimensions = '';
 let detector;
@@ -18,23 +26,21 @@ self.onmessage = function (e) {
 
   const newDimensions = `${width}x${height}`;
   if (detectorDimensions !== newDimensions) {
-    detector = new objectdetect.detector(width, height, 1.1, objectdetect.frontalface);
+    detector = new objectdetect.detector(width, height, 1.1, frontalface);
   }
 
-  var coords = detector.detect(image, 1);
-console.log(coords)
-return;
+  const coords = detector.detect(image, 1);
   // keep the best results
-  let topResults = rects.sort((recA, recB) => recB.confidence - recA.confidence).slice(0, maxDetectedFaces)
+  let topResults = coords.filter((coord) => coord[COORDS_CONFIDENCE] > CONFIDENCE_THRESHOLD).slice(0, maxDetectedFaces);
   
   if (topResults.length > 1) {
     // Limit false-positives:
     // if there is any face with positive confidence, exclude all negatives.
     // if all are negative, exclude the lowest score.
-    const highestScore = topResults[0].confidence;
+    const highestScore = topResults[0][COORDS_CONFIDENCE];
 
-    if (highestScore > 0) {
-      topResults = topResults.filter((result) => result.confidence > 0)
+    if (highestScore > LIMIT_THRESHOLD) {
+      topResults = topResults.filter((result) => result[LIMIT_THRESHOLD] > LIMIT_THRESHOLD)
     } else {
       topResults = topResults.slice(0, 1)
     }
@@ -42,10 +48,10 @@ return;
 
   // scale and remove some values
   const scaledResults = topResults.map(res => ({
-    x: res.x * scale,
-    y: res.y * scale,
-    width: res.width * scale,
-    height: res.height * scale,
+    x: res[COORDS_X] * scale,
+    y: res[COORDS_Y] * scale,
+    width: res[COORDS_W] * scale,
+    height: res[COORDS_H] * scale,
   }))
 
   postMessage({
