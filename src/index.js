@@ -1,4 +1,5 @@
-var Worker = require('worker-loader?inline!./DecoderWorker')
+//var Worker = require('worker-loader?inline!./DecoderWorker.jsfeat')
+var Worker = require('worker-loader?inline!./DecoderWorker.objectdetect')
 
 // static
 let lastMsgId = 0
