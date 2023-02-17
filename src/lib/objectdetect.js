@@ -67,31 +67,6 @@ var objectdetect = module.exports = (function() {
 		},
 		
 		/**
-		 * Horizontally mirrors a 1-channel source image.
-		 * 
-		 * @param {Array}  src       1-channel source image
-		 * @param {Number} srcWidth  Width of the source image
-		 * @param {Number} srcHeight Height of the source image
-		 * @param {Array} [dst]      1-channel destination image
-		 * 
-		 * @return {Array} 1-channel destination image
-		 */
-		mirrorImage = function(src, srcWidth, srcHeight, dst) {
-			if (!dst) dst = new src.constructor(srcWidth * srcHeight);
-			
-			var index = 0;
-			for (var y = 0; y < srcHeight; ++y) {
-				for (var x = (srcWidth >> 1); x >= 0; --x) {
-					var swap = src[index + x];
-					dst[index + x] = src[index + srcWidth - 1 - x];
-					dst[index + srcWidth - 1 - x] = swap;
-				}
-				index += srcWidth;
-			}
-			return dst;
-		},
-		
-		/**
 		 * Computes the gradient magnitude using a sobel filter after
 		 * applying gaussian smoothing (5x5 filter size). Useful for canny
 		 * pruning.
@@ -275,95 +250,6 @@ var objectdetect = module.exports = (function() {
 				}
 			}
 			
-			return dst;
-		},
-		
-		/**
-		 * Equalizes the histogram of an unsigned 1-channel image with integer 
-		 * values in [0, 255]. Corresponds to the equalizeHist OpenCV function.
-		 * 
-		 * @param {Array}  src   1-channel integer source image
-		 * @param {Number} step  Sampling stepsize, increase for performance
-		 * @param {Array}  [dst] 1-channel destination image
-		 * 
-		 * @return {Array} 1-channel destination image
-		 */
-		equalizeHistogram = function(src, step, dst) {
-			var srcLength = src.length;
-			if (!dst) dst = src;
-			if (!step) step = 5;
-			
-			// Compute histogram and histogram sum:
-			var hist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			            0, 0, 0, 0];
-			
-			for (var i = 0; i < srcLength; i += step) {
-				++hist[src[i]];
-			}
-			
-			// Compute integral histogram:
-			var norm = 255 * step / srcLength,
-				prev = 0;
-			for (var i = 0; i < 256; ++i) {
-				var h = hist[i];
-				prev = h += prev;
-				hist[i] = h * norm; // For non-integer src: ~~(h * norm + 0.5);
-			}
-			
-			// Equalize image:
-			for (var i = 0; i < srcLength; ++i) {
-				dst[i] = hist[src[i]];
-			}
-			return dst;
-		},
-		
-		/**
-		 * Horizontally mirrors a cascase classifier. Useful to detect mirrored
-		 * objects such as opposite hands.
-		 * 
-		 * @param {Array} dst Cascade classifier
-		 * 
-		 * @return {Array} Mirrored cascade classifier
-		 */
-		mirrorClassifier = function(src, dst) {
-			if (!dst) dst = new src.constructor(src);
-			var windowWidth  = src[0];
-			
-			for (var i = 1, iEnd = src.length - 1; i < iEnd; ) {
-				++i;
-				for (var j = 0, jEnd = src[++i]; j < jEnd; ++j) {
-					if (src[++i]) {		
-						// Simple classifier is tilted:
-						for (var kEnd = i + src[++i] * 5; i < kEnd; ) {
-							dst[i + 1] = windowWidth - src[i + 1];
-							var width = src[i + 3];
-							dst[i + 3] = src[i + 4];
-							dst[i + 4] = width;
-							i += 5;
-						}
-					} else {
-						// Simple classifier is not tilted:
-						for (var kEnd = i + src[++i] * 5; i < kEnd; ) {
-							dst[i + 1] = windowWidth - src[i + 1] - src[i + 3];
-							i += 5;
-						}
-					}
-					i += 3;
-				}
-			}
 			return dst;
 		},
 		
@@ -740,13 +626,10 @@ var objectdetect = module.exports = (function() {
 	return {
 		convertRgbaToGrayscale: convertRgbaToGrayscale,
 		rescaleImage: rescaleImage,
-		mirrorImage: mirrorImage,
 		computeCanny: computeCanny,
-		equalizeHistogram: equalizeHistogram,
 		computeSat: computeSat,
 		computeRsat: computeRsat,
 		computeSquaredSat: computeSquaredSat,
-		mirrorClassifier: mirrorClassifier,
 		compileClassifier: compileClassifier,
 		detect: detect,
 		groupRectangles: groupRectangles,

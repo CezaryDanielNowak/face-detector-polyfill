@@ -11,7 +11,7 @@ const COORDS_W = 2;
 const COORDS_H = 3;
 const COORDS_CONFIDENCE = 4;
 
-const SCALE_FACTOR = 1.1;
+const SCALE_FACTOR = 1.1; // NOTE: 1 doesn't detect anything
 
 let detectorDimensions = '';
 let detector;
@@ -28,7 +28,7 @@ self.onmessage = function (e) {
   const coords = detector.detect(image);
   // keep the best results
   let topResults = coords.filter((coord) => coord[COORDS_CONFIDENCE] > CONFIDENCE_THRESHOLD).slice(0, maxDetectedFaces);
-  
+
   if (topResults.length > 1) {
     // Limit false-positives:
     // if there is any face with positive confidence, exclude all negatives.

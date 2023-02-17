@@ -1,5 +1,4 @@
 // var Worker = require('worker-loader?inline!./DecoderWorker.jsfeat')
-// var Worker = require('worker-loader?inline!./DecoderWorker.objectdetect-haar')
 var Worker = require('worker-loader?inline!./DecoderWorker.objectdetect')
 
 // static
