@@ -1,3 +1,5 @@
+// FROM: https://github.com/mtschirs/js-objectdetect/blob/master/
+
 /**
  * Real-time object detector based on the Viola Jones Framework.
  * Compatible to OpenCV Haar Cascade Classifiers (stump based only).

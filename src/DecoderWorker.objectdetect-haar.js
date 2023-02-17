@@ -1,4 +1,4 @@
-var objectdetect = require('./lib/objectdetect');
+var objectdetect = require('./lib/objectdetect-haar');
 var frontalface = require('./lib/objectdetect.frontalface').frontalface;
 // var frontalface = require('./lib/objectdetect.frontalface_alt').frontalface_alt; // SLOW!
 
@@ -14,18 +14,18 @@ const COORDS_CONFIDENCE = 4;
 const SCALE_FACTOR = 1.1;
 
 let detectorDimensions = '';
-let detector;
+let detect;
 
 self.onmessage = function (e) {
   const { width, height, image, scale, maxDetectedFaces, id } = e.data;
 
   const newDimensions = `${width}x${height}`;
   if (detectorDimensions !== newDimensions) {
-    detector = new objectdetect.detector(width, height, SCALE_FACTOR, frontalface);
+    detect = objectdetect(frontalface, { width, height, scale: SCALE_FACTOR });
     detectorDimensions = newDimensions;
   }
 
-  const coords = detector.detect(image);
+  const coords = detect(image);
   // keep the best results
   let topResults = coords.filter((coord) => coord[COORDS_CONFIDENCE] > CONFIDENCE_THRESHOLD).slice(0, maxDetectedFaces);
   

@@ -46,7 +46,7 @@
 
         var faceDetector = new FaceDetector({
           maxDetectedFaces: 100,
-          fastMode: false,
+          maxWorkSize: 640,
         });
 
         function handleResults (result) {

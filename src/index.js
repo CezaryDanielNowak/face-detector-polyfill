@@ -1,4 +1,5 @@
-//var Worker = require('worker-loader?inline!./DecoderWorker.jsfeat')
+// var Worker = require('worker-loader?inline!./DecoderWorker.jsfeat')
+// var Worker = require('worker-loader?inline!./DecoderWorker.objectdetect-haar')
 var Worker = require('worker-loader?inline!./DecoderWorker.objectdetect')
 
 // static
@@ -27,21 +28,16 @@ const faceDetectorCallback = (e) => {
 
 const DEFAULT_OPTIONS = {
   maxDetectedFaces: 1,
-  fastMode: true,
+  maxWorkSize: 320,
 }
-
-const MAX_WORK_SIZE_FAST = 320
-const MAX_WORK_SIZE_SLOW = 640
 
 export default class Library {
   constructor(options) {
-    const config = Object.assign({},
+    this.config = Object.assign({},
       DEFAULT_OPTIONS,
       options
     )
 
-    this.maxDetectedFaces = config.maxDetectedFaces
-    this.maxWorkSize = config.fastMode ? MAX_WORK_SIZE_FAST : MAX_WORK_SIZE_SLOW
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d', { willReadFrequently: true })
 
@@ -49,7 +45,17 @@ export default class Library {
     this.worker.onmessage = faceDetectorCallback
   }
 
+  remove() {
+    this.worker.terminate();
+    this.worker = null;
+    this.canvas.remove();
+    this.canvas = null;
+    this.ctx = null;
+    this.config = null;
+  }
+
   detect(input) {
+    const { worker, canvas, ctx, config } = this;
     return new Promise((resolve, reject) => {
       // book keeping
       ++lastMsgId;
@@ -63,19 +69,19 @@ export default class Library {
       const W = input.videoWidth || input.naturalWidth || input.width
       const H = input.videoHeight || input.naturalHeight || input.height
 
-      const scale = Math.min(this.maxWorkSize / W, this.maxWorkSize / H);
-      this.canvas.width = W * scale;
-      this.canvas.height = H * scale;
+      const scale = Math.min(config.maxWorkSize / W, config.maxWorkSize / H);
+      canvas.width = W * scale;
+      canvas.height = H * scale;
       
-      this.ctx.drawImage(input, 0, 0, this.canvas.width, this.canvas.height);
+      ctx.drawImage(input, 0, 0, canvas.width, canvas.height);
 
-      this.worker.postMessage({
+      worker.postMessage({
         id: lastMsgId,
-        image: this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height),
-        width: this.canvas.width,
-        height: this.canvas.height,
+        image: ctx.getImageData(0, 0, canvas.width, canvas.height),
+        width: canvas.width,
+        height: canvas.height,
         scale: 1 / scale,
-        maxDetectedFaces: this.maxDetectedFaces,
+        maxDetectedFaces: config.maxDetectedFaces,
       })
     });
   }
