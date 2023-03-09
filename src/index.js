@@ -36,7 +36,15 @@ const DEFAULT_OPTIONS = {
    *
    * @type {Boolean}
    */
-  sendGray: true,
+  sendGray: false,
+
+  /**
+   * Last value returned by objectdetect. I have no idea what it means exactly
+   * but value of 10 seems reasonable.
+   *
+   * @type {Number}
+   */
+  minConfidence: 10,
 }
 
 /**
@@ -103,7 +111,8 @@ export default class Library {
       const scale = Math.min(config.maxWorkSize / W, config.maxWorkSize / H);
       canvas.width = W * scale;
       canvas.height = H * scale;
-      
+
+      ctx.filter = 'grayscale(1)';
       ctx.drawImage(input, 0, 0, canvas.width, canvas.height);
 
       let image = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -113,7 +122,7 @@ export default class Library {
         }
 
         this.prevGrayScaldImage = convertRgbaToGrayscale(image.data, this.prevGrayScaldImage);
-
+        
         image = {
           width: image.width,
           height: image.height,
@@ -126,6 +135,7 @@ export default class Library {
         image,
         scale: 1 / scale,
         maxDetectedFaces: config.maxDetectedFaces,
+        minConfidence: config.minConfidence,
       })
     });
   }

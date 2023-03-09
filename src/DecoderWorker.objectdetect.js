@@ -2,9 +2,6 @@ var Detector = require('./lib/objectdetect');
 var frontalFaceClassifier = require('./lib/objectdetect.frontalface');
 // var frontalface = require('./lib/objectdetect.frontalface_alt').frontalface_alt; // SLOW!
 
-const CONFIDENCE_THRESHOLD = 10;
-const LIMIT_THRESHOLD = 20;
-
 const COORDS_X = 0;
 const COORDS_Y = 1;
 const COORDS_W = 2;
@@ -17,7 +14,13 @@ let detectorDimensions = '';
 let detector;
 
 self.onmessage = function (e) {
-  const { image, scale, maxDetectedFaces, id } = e.data;
+  const {
+    image,
+    scale,
+    maxDetectedFaces,
+    id,
+    minConfidence,
+  } = e.data;
   const { width, height } = image;
 
   const newDimensions = `${width}x${height}`;
@@ -26,24 +29,11 @@ self.onmessage = function (e) {
     detectorDimensions = newDimensions;
   }
   const coords = detector.detect(image);
-  
+
   // keep the best results
   let topResults = coords
-    .filter((coord) => coord[COORDS_CONFIDENCE] > CONFIDENCE_THRESHOLD)
+    .filter((coord) => coord[COORDS_CONFIDENCE] > minConfidence)
     .slice(0, maxDetectedFaces);
-
-  if (topResults.length > 1) {
-    // Limit false-positives:
-    // if there is any face with positive confidence, exclude all negatives.
-    // if all are negative, exclude the lowest score.
-    const highestScore = topResults[0][COORDS_CONFIDENCE];
-
-    if (highestScore > LIMIT_THRESHOLD) {
-      topResults = topResults.filter((result) => result[LIMIT_THRESHOLD] > LIMIT_THRESHOLD)
-    } else {
-      topResults = topResults.slice(0, 1)
-    }
-  }
 
   // scale and remove some values
   const scaledResults = topResults.map(res => ({
