@@ -44,8 +44,8 @@ module.exports = (function() {
 	function rescaleImage(src, srcWidth, srcHeight, factor, dst) {
 		var srcLength = srcHeight * srcWidth,
 			dstWidth = ~~(srcWidth / factor),
-			dstHeight = ~~(srcHeight / factor),
-			dstIndex,
+			dstHeight = ~~(srcHeight / factor);
+		var dstIndex,
 			srcIndex,
 			srcEnd;
 		
@@ -226,8 +226,8 @@ module.exports = (function() {
 	 */
 	function computeRsat(src, srcWidth, srcHeight, dst) {
 		var dstWidth = srcWidth + 1,
-			srcHeightTimesDstWidth = srcHeight * dstWidth,
-			i, y, x;
+			srcHeightTimesDstWidth = srcHeight * dstWidth;
+		var i, y, x;
 			
 		if (!dst) dst = new Uint32Array(srcWidth * srcHeight + dstWidth + srcHeight);
 		
@@ -441,8 +441,8 @@ module.exports = (function() {
 	 * @return {Array} Mean rectangles (Arrays of 4 floats)
 	 */
 	function groupRectangles(rects, minNeighbors, confluence) {
-		var rectsLength = rects.length,
-			i, j, group;
+		var rectsLength = rects.length;
+		var i, j, group;
 		if (!confluence) confluence = 0.25;
 		
 		// Partition rects into similarity classes:
@@ -548,7 +548,6 @@ module.exports = (function() {
 		 * @param classifier  Compiled cascade classifier
 		 */
 		constructor(width, height, scaleFactor, classifier) {
-			console.log(width, height, scaleFactor, classifier);
 			// this.canvas = document.createElement('canvas');
 			// this.canvas.width = width;
 			// this.canvas.height = height;
@@ -556,9 +555,15 @@ module.exports = (function() {
 			this.tilted = classifier.tilted;
 			this.scaleFactor = scaleFactor;
 			this.scaledGray = new Uint32Array(width * height);
+
 			var numScales = ~~(Math.log(Math.min(width / classifier[0], height / classifier[1])) / Math.log(scaleFactor));
-			this.compiledClassifiers = Array.from({ length: numScales })
-				.map((_, i) => compileClassifier(classifier, ~~(width / Math.pow(scaleFactor, i + 1))));
+			this.compiledClassifiers = Array.from({ length: numScales });
+			var scale = 1;
+			for (var i = 0; i < numScales; ++i) {
+				var scaledWidth = ~~(width / scale);
+				this.compiledClassifiers[i] = compileClassifier(classifier, scaledWidth);
+				scale *= scaleFactor;
+			}
 		}
 
 		/**
@@ -588,8 +593,6 @@ module.exports = (function() {
 			const imageData = _imageData.data;
 			const isGray = imageData.length < width * height * 4;
 
-
-			console.log('isGray', isGray);
 			this.gray = isGray
 				? imageData
 				: convertRgbaToGrayscale(imageData, this.gray);
@@ -630,4 +633,4 @@ module.exports = (function() {
 			return (group ? groupRectangles(rects, group) : rects).sort(function(r1, r2) {return r2[4] - r1[4];});
 		}
 	};
-})(module.exports);
+})();

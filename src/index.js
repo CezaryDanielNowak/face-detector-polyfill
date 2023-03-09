@@ -39,11 +39,31 @@ const DEFAULT_OPTIONS = {
   sendGray: true,
 }
 
+/**
+ * Converts from a 4-channel RGBA source image to a 1-channel grayscale
+ * image. Corresponds to the CV_RGB2GRAY OpenCV color space conversion.
+ *
+ * @param {Array} src   4-channel 8-bit source image
+ * @param {Array} [dst] 1-channel 32-bit destination image
+ *
+ * @return {Array} 1-channel 32-bit destination image
+ */
+function convertRgbaToGrayscale(src, dst) {
+  var srcLength = src.length;
+  if (!dst) dst = new Uint32Array(srcLength >> 2);
+  
+  for (let i = 0; i < srcLength; i += 2) {
+    dst[i >> 2] = (src[i] * 4899 + src[++i] * 9617 + src[++i] * 1868 + 8192) >> 14;
+  }
+
+  return dst;
+}
+
 export default class Library {
   constructor(config) {
     this.config = Object.assign({},
       DEFAULT_OPTIONS,
-      config
+      config,
     )
 
     this.canvas = document.createElement('canvas');
@@ -71,14 +91,14 @@ export default class Library {
       // book keeping
       ++lastMsgId;
 
-      resolves[lastMsgId] = resolve
-      rejects[lastMsgId] = reject
+      resolves[lastMsgId] = resolve;
+      rejects[lastMsgId] = reject;
 
       // videoWidth = HTMLVideoElement
       // naturalWidth = HTMLImageElement
       // width = HTMLCanvasElement
-      const W = input.videoWidth || input.naturalWidth || input.width
-      const H = input.videoHeight || input.naturalHeight || input.height
+      const W = input.videoWidth || input.naturalWidth || input.width;
+      const H = input.videoHeight || input.naturalHeight || input.height;
 
       const scale = Math.min(config.maxWorkSize / W, config.maxWorkSize / H);
       canvas.width = W * scale;
@@ -93,7 +113,12 @@ export default class Library {
         }
 
         this.prevGrayScaldImage = convertRgbaToGrayscale(image.data, this.prevGrayScaldImage);
-        image.data = this.prevGrayScaldImage;
+
+        image = {
+          width: image.width,
+          height: image.height,
+          data: this.prevGrayScaldImage,
+        };
       }
 
       worker.postMessage({
@@ -106,21 +131,3 @@ export default class Library {
   }
 }
 
-/**
- * Converts from a 4-channel RGBA source image to a 1-channel grayscale
- * image. Corresponds to the CV_RGB2GRAY OpenCV color space conversion.
- *
- * @param {Array} src   4-channel 8-bit source image
- * @param {Array} [dst] 1-channel 32-bit destination image
- *
- * @return {Array} 1-channel 32-bit destination image
- */
-function convertRgbaToGrayscale(src, dst) {
-  var srcLength = src.length, i;
-  if (!dst) dst = new Uint32Array(srcLength >> 2);
-  
-  for (i = 0; i < srcLength; i += 2) {
-    dst[i >> 2] = (src[i] * 4899 + src[++i] * 9617 + src[++i] * 1868 + 8192) >> 14;
-  }
-  return dst;
-}

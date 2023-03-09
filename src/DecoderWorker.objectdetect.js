@@ -20,17 +20,17 @@ self.onmessage = function (e) {
   const { image, scale, maxDetectedFaces, id } = e.data;
   const { width, height } = image;
 
-  console.log(width, height);
-
   const newDimensions = `${width}x${height}`;
   if (detectorDimensions !== newDimensions) {
     detector = new Detector(width, height, SCALE_FACTOR, frontalFaceClassifier);
     detectorDimensions = newDimensions;
   }
-
   const coords = detector.detect(image);
+  
   // keep the best results
-  let topResults = coords.filter((coord) => coord[COORDS_CONFIDENCE] > CONFIDENCE_THRESHOLD).slice(0, maxDetectedFaces);
+  let topResults = coords
+    .filter((coord) => coord[COORDS_CONFIDENCE] > CONFIDENCE_THRESHOLD)
+    .slice(0, maxDetectedFaces);
 
   if (topResults.length > 1) {
     // Limit false-positives:
