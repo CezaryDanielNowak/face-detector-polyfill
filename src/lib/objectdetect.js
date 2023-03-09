@@ -548,6 +548,7 @@ module.exports = (function() {
 		 * @param classifier  Compiled cascade classifier
 		 */
 		constructor(width, height, scaleFactor, classifier) {
+			console.log(width, height, scaleFactor, classifier);
 			// this.canvas = document.createElement('canvas');
 			// this.canvas.width = width;
 			// this.canvas.height = height;
@@ -585,7 +586,13 @@ module.exports = (function() {
 			const width = _imageData.width;
 			const height = _imageData.height;
 			const imageData = _imageData.data;
-			this.gray = convertRgbaToGrayscale(imageData, this.gray);
+			const isGray = imageData.length < width * height * 4;
+
+
+			console.log('isGray', isGray);
+			this.gray = isGray
+				? imageData
+				: convertRgbaToGrayscale(imageData, this.gray);
 			
 			var rects = [];
 			var scale = 1;

@@ -17,7 +17,10 @@ let detectorDimensions = '';
 let detector;
 
 self.onmessage = function (e) {
-  const { width, height, image, scale, maxDetectedFaces, id } = e.data;
+  const { image, scale, maxDetectedFaces, id } = e.data;
+  const { width, height } = image;
+
+  console.log(width, height);
 
   const newDimensions = `${width}x${height}`;
   if (detectorDimensions !== newDimensions) {

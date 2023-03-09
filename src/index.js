@@ -28,20 +28,31 @@ const faceDetectorCallback = (e) => {
 const DEFAULT_OPTIONS = {
   maxDetectedFaces: 1,
   maxWorkSize: 320,
+
+  /**
+   * sendGray converts ImageData to gray scale before sending it to web worker.
+   * This way we are sending 4x less data to the worker but some calculations are
+   * performed on the UI thread.
+   *
+   * @type {Boolean}
+   */
+  sendGray: true,
 }
 
 export default class Library {
-  constructor(options) {
+  constructor(config) {
     this.config = Object.assign({},
       DEFAULT_OPTIONS,
-      options
+      config
     )
 
-    this.canvas = document.createElement('canvas')
-    this.ctx = this.canvas.getContext('2d', { willReadFrequently: true })
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
 
     this.worker = new Worker();
-    this.worker.onmessage = faceDetectorCallback
+    this.worker.onmessage = faceDetectorCallback;
+
+    this.prevGrayScaldImage = [];
   }
 
   remove() {
@@ -51,6 +62,7 @@ export default class Library {
     this.canvas = null;
     this.ctx = null;
     this.config = null;
+    this.prevGrayScaldImage = null;
   }
 
   detect(input) {
@@ -74,14 +86,41 @@ export default class Library {
       
       ctx.drawImage(input, 0, 0, canvas.width, canvas.height);
 
+      let image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      if (config.sendGray) {
+        if (this.prevGrayScaldImage.length !== image.data.length / 4) {
+          this.prevGrayScaldImage = null;
+        }
+
+        this.prevGrayScaldImage = convertRgbaToGrayscale(image.data, this.prevGrayScaldImage);
+        image.data = this.prevGrayScaldImage;
+      }
+
       worker.postMessage({
         id: lastMsgId,
-        image: ctx.getImageData(0, 0, canvas.width, canvas.height),
-        width: canvas.width,
-        height: canvas.height,
+        image,
         scale: 1 / scale,
         maxDetectedFaces: config.maxDetectedFaces,
       })
     });
   }
+}
+
+/**
+ * Converts from a 4-channel RGBA source image to a 1-channel grayscale
+ * image. Corresponds to the CV_RGB2GRAY OpenCV color space conversion.
+ *
+ * @param {Array} src   4-channel 8-bit source image
+ * @param {Array} [dst] 1-channel 32-bit destination image
+ *
+ * @return {Array} 1-channel 32-bit destination image
+ */
+function convertRgbaToGrayscale(src, dst) {
+  var srcLength = src.length, i;
+  if (!dst) dst = new Uint32Array(srcLength >> 2);
+  
+  for (i = 0; i < srcLength; i += 2) {
+    dst[i >> 2] = (src[i] * 4899 + src[++i] * 9617 + src[++i] * 1868 + 8192) >> 14;
+  }
+  return dst;
 }
