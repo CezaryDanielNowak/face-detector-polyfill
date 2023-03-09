@@ -1,5 +1,5 @@
-var objectdetect = require('./lib/objectdetect');
-var frontalface = require('./lib/objectdetect.frontalface').frontalface;
+var Detector = require('./lib/objectdetect');
+var frontalFaceClassifier = require('./lib/objectdetect.frontalface');
 // var frontalface = require('./lib/objectdetect.frontalface_alt').frontalface_alt; // SLOW!
 
 const CONFIDENCE_THRESHOLD = 10;
@@ -21,7 +21,7 @@ self.onmessage = function (e) {
 
   const newDimensions = `${width}x${height}`;
   if (detectorDimensions !== newDimensions) {
-    detector = new objectdetect.detector(width, height, SCALE_FACTOR, frontalface);
+    detector = new Detector(width, height, SCALE_FACTOR, frontalFaceClassifier);
     detectorDimensions = newDimensions;
   }
 
