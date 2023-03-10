@@ -121,7 +121,6 @@ export default class Library {
       canvas.width = W * scale;
       canvas.height = H * scale;
 
-      ctx.filter = 'grayscale(1)';
       ctx.drawImage(input, 0, 0, canvas.width, canvas.height);
 
       let image = ctx.getImageData(0, 0, canvas.width, canvas.height);
