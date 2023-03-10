@@ -46,7 +46,13 @@
       var $img = document.createElement('img');
       var $canvas = document.getElementById('display');
       var $output = document.getElementById('output');
-      // img.crossOrigin = "No CORS";
+      
+      const imgs = [
+        'single.jpg',
+        'deep-faces.png',
+        'multi.jpg',
+      ];
+
       $img.onload = async function() {
         // draw on canvas
         $canvas.width = $img.naturalWidth;
@@ -54,9 +60,9 @@
         $canvas.getContext('2d').drawImage($img, 0, 0);
         const src = $img.getAttribute('src');
 
-
         $output.innerHTML += `\nCYCLES  |  DETECTED FACES  | TEST NAME\n<strong>${src}:</strong>`;
         $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=320 (default)', { maxWorkSize: 320 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=700', { maxWorkSize: 700 });
         $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=600', { maxWorkSize: 600 });
         $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=500', { maxWorkSize: 500 });
         $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=400', { maxWorkSize: 400 });
@@ -65,6 +71,16 @@
         $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=150', { maxWorkSize: 150 });
         $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=100', { maxWorkSize: 100 });
 
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=700,minConfidence=0', { maxWorkSize: 700, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=600,minConfidence=0', { maxWorkSize: 600, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=500,minConfidence=0', { maxWorkSize: 500, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=400,minConfidence=0', { maxWorkSize: 400, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=300,minConfidence=0', { maxWorkSize: 300, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=200,minConfidence=0', { maxWorkSize: 200, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=150,minConfidence=0', { maxWorkSize: 150, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=100,minConfidence=0', { maxWorkSize: 100, minConfidence: 0 });
+
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=700,sendGray', { maxWorkSize: 700, sendGray: true });
         $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=600,sendGray', { maxWorkSize: 600, sendGray: true });
         $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=500,sendGray', { maxWorkSize: 500, sendGray: true });
         $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=400,sendGray', { maxWorkSize: 400, sendGray: true });
@@ -73,12 +89,13 @@
         $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=150,sendGray', { maxWorkSize: 150, sendGray: true });
         $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=100,sendGray', { maxWorkSize: 100, sendGray: true });
         
-        if (src !== 'single.jpg') {
-          $img.src = 'single.jpg';
+        const imgIndex = imgs.indexOf(src);
+        if (imgIndex + 1 < imgs.length) {
+          $img.src = imgs[imgIndex + 1];
         }
         
       }
-      $img.src = 'multi.jpg';
+      $img.src = imgs[0];
     }
 
 

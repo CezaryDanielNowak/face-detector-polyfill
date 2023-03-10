@@ -27,6 +27,15 @@ const faceDetectorCallback = (e) => {
 
 const DEFAULT_OPTIONS = {
   maxDetectedFaces: 1,
+
+  /**
+   * adjust maxWorkSize for performance. In case when you're detecting single
+   * face on a video stream it can be reduced significantly to get higher fps.
+   *
+   * When detecting multiple, small faces then value needs to be bigger.
+   * 
+   * @type {Number}
+   */
   maxWorkSize: 320,
 
   /**
