@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FaceDetector Polyfill Example</title>
+    <style>
+      canvas {
+        max-width: 100%;
+      }
+
+      #output {
+        white-space: pre;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="output"></div>
+    <canvas id="display"></canvas>
+  </body>
+
+  <script>
+    (function () {
+      function loadScript(src, done) {
+        var $script = document.createElement('script');
+        $script.src = src;
+        $script.onload = function() {
+          done();
+        };
+        $script.onerror = function() {
+          done(new Error('Failed to load script ' + src));
+        };
+        document.head.appendChild($script);
+      }
+      if ('FaceDetector' in window) {
+        startTheApp();
+      } else {
+        loadScript(
+          "../FaceDetector.min.js", 
+          startTheApp
+        );
+      }
+    })()
+
+    function startTheApp() {
+      var $img = document.createElement('img');
+      var $canvas = document.getElementById('display');
+      var $output = document.getElementById('output');
+      
+      const imgs = [
+        'single.jpg',
+        'deep-faces.png',
+        'multi.jpg',
+      ];
+
+      $img.onload = async function() {
+        // draw on canvas
+        $canvas.width = $img.naturalWidth;
+        $canvas.height = $img.naturalHeight;
+        $canvas.getContext('2d').drawImage($img, 0, 0);
+        const src = $img.getAttribute('src');
+
+        $output.innerHTML += `\nCYCLES  |  DETECTED FACES  | TEST NAME\n<strong>${src}:</strong>`;
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=320 (default)', { maxWorkSize: 320 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=700', { maxWorkSize: 700 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=600', { maxWorkSize: 600 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=500', { maxWorkSize: 500 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=400', { maxWorkSize: 400 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=300', { maxWorkSize: 300 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=200', { maxWorkSize: 200 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=150', { maxWorkSize: 150 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=100', { maxWorkSize: 100 });
+
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=700,minConfidence=0', { maxWorkSize: 700, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=600,minConfidence=0', { maxWorkSize: 600, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=500,minConfidence=0', { maxWorkSize: 500, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=400,minConfidence=0', { maxWorkSize: 400, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=300,minConfidence=0', { maxWorkSize: 300, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=200,minConfidence=0', { maxWorkSize: 200, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=150,minConfidence=0', { maxWorkSize: 150, minConfidence: 0 });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=100,minConfidence=0', { maxWorkSize: 100, minConfidence: 0 });
+
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=700,sendGray', { maxWorkSize: 700, sendGray: true });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=600,sendGray', { maxWorkSize: 600, sendGray: true });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=500,sendGray', { maxWorkSize: 500, sendGray: true });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=400,sendGray', { maxWorkSize: 400, sendGray: true });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=300,sendGray', { maxWorkSize: 300, sendGray: true });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=200,sendGray', { maxWorkSize: 200, sendGray: true });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=150,sendGray', { maxWorkSize: 150, sendGray: true });
+        $output.innerHTML += await runBenchmark($canvas, benchSimple, 'maxWorkSize=100,sendGray', { maxWorkSize: 100, sendGray: true });
+        
+        const imgIndex = imgs.indexOf(src);
+        if (imgIndex + 1 < imgs.length) {
+          $img.src = imgs[imgIndex + 1];
+        }
+        
+      }
+      $img.src = imgs[0];
+    }
+
+
+    async function runBenchmark(canvas, testFunction, testName, extraConfig = {}) {
+      const timePerTest = 2000;
+      let i = 0;
+      let result;
+
+      const test = testFunction(canvas, extraConfig);
+      const startTime = Date.now();
+      while(++i) {
+        if (Date.now() - startTime > timePerTest) {
+          --i; // last test finished after time passed. Does not count.
+
+          break;
+        }
+        result = await test.run();
+      }
+
+      test.remove();
+
+      const count = `${i}`.padStart(13);
+      const faces = `${result.length}`.padStart(13);
+
+      return `\n${count} | ${faces} |  ${testName}`;
+    }
+
+    function benchSimple(canvas, extraConfig = {}) {
+      var faceDetector = new FaceDetector({
+        maxDetectedFaces: 100,
+        ...extraConfig,
+      });
+
+      return {
+        run: () => {
+          return faceDetector.detect(canvas);
+        },
+        remove: () => {
+          faceDetector.remove();
+        }
+      }
+    }
+
+
+  </script>
+</html>

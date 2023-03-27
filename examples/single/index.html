@@ -30,7 +30,7 @@
         } else {
           console.log('Loading polyfill');
           loadScript(
-            "../FaceDetector.js", 
+            "../FaceDetector.min.js", 
             startTheApp
           );
         }
@@ -46,7 +46,7 @@
 
         var faceDetector = new FaceDetector({
           maxDetectedFaces: 100,
-          fastMode: false,
+          maxWorkSize: 640,
         });
 
         function handleResults (result) {
